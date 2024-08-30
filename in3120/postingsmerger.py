@@ -1,7 +1,7 @@
 # pylint: disable=missing-module-docstring
 
 from typing import Iterator
-from .posting import Posting
+from .posting import Posting 
 
 
 class PostingsMerger:
@@ -24,7 +24,27 @@ class PostingsMerger:
         The posting lists are assumed sorted in increasing order according
         to the document identifiers.
         """
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+
+        try:
+            pointer1 = next(iter1)
+            pointer2 = next(iter2)
+        except StopIteration:
+            return
+        
+        while True:
+            try: 
+                if pointer1.document_id == pointer2.document_id:
+                    yield pointer1
+                    pointer1 = next(iter1)
+                    pointer2 = next(iter2)
+                elif pointer1.document_id < pointer2.document_id:
+                    pointer1 = next(iter1)
+                else:
+                    pointer2 = next(iter2)
+            except StopIteration:
+                break
+
+       
 
     @staticmethod
     def union(iter1: Iterator[Posting], iter2: Iterator[Posting]) -> Iterator[Posting]:
@@ -35,7 +55,34 @@ class PostingsMerger:
         The posting lists are assumed sorted in increasing order according
         to the document identifiers.
         """
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        try:
+            pointer1 = next(iter1)
+        except StopIteration:
+            yield from iter2  
+            return
+        
+        try:
+            pointer2 = next(iter2)
+        except StopIteration:
+            yield pointer1 
+            yield from iter1 
+            return
+        
+        
+        while True: 
+            try:
+                if pointer1.document_id == pointer2.document_id:
+                    yield pointer1
+                    pointer1 = next(iter1)
+                    pointer2 = next(iter2)
+                elif pointer1.document_id < pointer2.document_id:
+                    yield pointer1
+                    pointer1 = next(iter1)
+                else:
+                    yield pointer2
+                    pointer2 = next(iter2)
+            except StopIteration:
+                break
 
     @staticmethod
     def difference(iter1: Iterator[Posting], iter2: Iterator[Posting]) -> Iterator[Posting]:
@@ -45,5 +92,42 @@ class PostingsMerger:
 
         The posting lists are assumed sorted in increasing order according
         to the document identifiers.
-        """
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        """        
+        try:
+            pointer1 = next(iter1)
+        except StopIteration:
+            return # only return since then iter1 has nothing in common to iter2
+        
+        try:
+            pointer2 = next(iter2)
+        except StopIteration:
+            yield pointer1  
+            yield from iter1 
+            return
+        
+        last_yielded = None
+
+        while True:
+            try:
+                if pointer1.document_id < pointer2.document_id:
+                    last_yielded = pointer1
+                    yield pointer1
+                    pointer1 = next(iter1)
+                elif pointer1.document_id > pointer2.document_id:
+                    pointer2 = next(iter2)
+                else:
+                    pointer1 = next(iter1)
+                    pointer2 = next(iter2)
+            except StopIteration:
+                break
+
+        if last_yielded is None or last_yielded.document_id != pointer1.document_id:
+            yield pointer1
+
+        try:
+            while True:
+                pointer1 = next(iter1)
+                print(f"yielding remaining {pointer1.document_id}")
+                yield pointer1
+        except StopIteration:
+            pass
