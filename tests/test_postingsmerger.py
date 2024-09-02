@@ -70,7 +70,7 @@ class TestPostingsMerger(unittest.TestCase):
         corpus = in3120.InMemoryCorpus("../data/mesh.txt")
         index = in3120.InMemoryInvertedIndex(corpus, ["body"], normalizer, tokenizer, compressed)
         self._process_query_with_two_terms(corpus, index, "HIV  pROtein", self._merger.intersection,
-                                           [11316, 11319, 11320, 11321])
+                                            [11316, 11319, 11320, 11321])
         self._process_query_with_two_terms(corpus, index, "water Toxic", self._merger.union,
                                            [3078, 8138, 8635, 9379, 14472, 18572, 23234, 23985] +
                                            list(range(25265, 25282)))
