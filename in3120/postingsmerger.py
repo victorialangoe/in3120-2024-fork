@@ -55,6 +55,8 @@ class PostingsMerger:
         The posting lists are assumed sorted in increasing order according
         to the document identifiers.
         """
+        has_seen = set()  
+
         try:
             pointer1 = next(iter1)
         except StopIteration:
@@ -68,21 +70,36 @@ class PostingsMerger:
             yield from iter1 
             return
         
-        
         while True: 
             try:
                 if pointer1.document_id == pointer2.document_id:
-                    yield pointer1
+                    if pointer1.document_id not in has_seen:
+                        yield pointer1
+                        has_seen.add(pointer1.document_id)
                     pointer1 = next(iter1)
                     pointer2 = next(iter2)
                 elif pointer1.document_id < pointer2.document_id:
-                    yield pointer1
+                    if pointer1.document_id not in has_seen:
+                        yield pointer1
+                        has_seen.add(pointer1.document_id)
                     pointer1 = next(iter1)
                 else:
-                    yield pointer2
+                    if pointer2.document_id not in has_seen:
+                        yield pointer2
+                        has_seen.add(pointer2.document_id)
                     pointer2 = next(iter2)
             except StopIteration:
                 break
+        
+        if pointer1.document_id not in has_seen:
+            yield pointer1
+            has_seen.add(pointer1.document_id)
+        yield from (p for p in iter1 if p.document_id not in has_seen)
+        
+        if pointer2.document_id not in has_seen:
+            yield pointer2
+            has_seen.add(pointer2.document_id)
+        yield from (p for p in iter2 if p.document_id not in has_seen)
 
     @staticmethod
     def difference(iter1: Iterator[Posting], iter2: Iterator[Posting]) -> Iterator[Posting]:
