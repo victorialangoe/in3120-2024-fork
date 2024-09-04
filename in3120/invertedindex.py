@@ -114,10 +114,9 @@ class InMemoryInvertedIndex(InvertedIndex):
             document_id = document.document_id
             for field_name in fields:
                 field_content = document[field_name]
-                normalized_content = self._normalizer.normalize(field_content)
-                tokenized_terms = self._tokenizer.tokens(normalized_content)
+                tokenized_content = self.get_terms(field_content)
 
-                for token, _ in tokenized_terms:
+                for token in tokenized_content:
                     term_id = self._dictionary.add_if_absent(token)
                     
                     self._append_to_posting_list(term_id, document_id, 1, compressed)
