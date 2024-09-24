@@ -61,27 +61,27 @@ class TestSuffixArray(unittest.TestCase):
             if statistic.traceback[0].filename == inspect.getfile(in3120.SuffixArray):
                 self.assertLessEqual(statistic.size_diff, 2000000, "Memory usage seems excessive.")
 
-#     def test_multiple_fields(self):
-#         corpus = in3120.InMemoryCorpus()
-#         corpus.add_document(in3120.InMemoryDocument(0, {"field1": "a b c", "field2": "b c d"}))
-#         corpus.add_document(in3120.InMemoryDocument(1, {"field1": "x", "field2": "y"}))
-#         corpus.add_document(in3120.InMemoryDocument(2, {"field1": "y", "field2": "z"}))
-#         engine0 = in3120.SuffixArray(corpus, ["field1", "field2"], self.__normalizer, self.__tokenizer)
-#         engine1 = in3120.SuffixArray(corpus, ["field1"], self.__normalizer, self.__tokenizer)
-#         engine2 = in3120.SuffixArray(corpus, ["field2"], self.__normalizer, self.__tokenizer)
-#         self.__process_query_and_verify_winner(engine0, "b c", [0], 2)
-#         self.__process_query_and_verify_winner(engine0, "y", [1, 2], 1)
-#         self.__process_query_and_verify_winner(engine1, "x", [1], 1)
-#         self.__process_query_and_verify_winner(engine1, "y", [2], 1)
-#         self.__process_query_and_verify_winner(engine1, "z", [], None)
-#         self.__process_query_and_verify_winner(engine2, "z", [2], 1)
+    # def test_multiple_fields(self):
+    #     corpus = in3120.InMemoryCorpus()
+    #     corpus.add_document(in3120.InMemoryDocument(0, {"field1": "a b c", "field2": "b c d"}))
+    #     corpus.add_document(in3120.InMemoryDocument(1, {"field1": "x", "field2": "y"}))
+    #     corpus.add_document(in3120.InMemoryDocument(2, {"field1": "y", "field2": "z"}))
+    #     engine0 = in3120.SuffixArray(corpus, ["field1", "field2"], self.__normalizer, self.__tokenizer)
+    #     engine1 = in3120.SuffixArray(corpus, ["field1"], self.__normalizer, self.__tokenizer)
+    #     engine2 = in3120.SuffixArray(corpus, ["field2"], self.__normalizer, self.__tokenizer)
+    #     self.__process_query_and_verify_winner(engine0, "b c", [0], 2)
+    #     self.__process_query_and_verify_winner(engine0, "y", [1, 2], 1)
+    #     self.__process_query_and_verify_winner(engine1, "x", [1], 1)
+    #     self.__process_query_and_verify_winner(engine1, "y", [2], 1)
+    #     self.__process_query_and_verify_winner(engine1, "z", [], None)
+    #     self.__process_query_and_verify_winner(engine2, "z", [2], 1)
 
-#     def test_uses_yield(self):
-#         corpus = in3120.InMemoryCorpus()
-#         corpus.add_document(in3120.InMemoryDocument(0, {"a": "the foo bar"}))
-#         engine = in3120.SuffixArray(corpus, ["a"], self.__normalizer, self.__tokenizer)
-#         matches = engine.evaluate("foo", {})
-#         self.assertIsInstance(matches, types.GeneratorType, "Are you using yield?")
+    # def test_uses_yield(self):
+    #     corpus = in3120.InMemoryCorpus()
+    #     corpus.add_document(in3120.InMemoryDocument(0, {"a": "the foo bar"}))
+    #     engine = in3120.SuffixArray(corpus, ["a"], self.__normalizer, self.__tokenizer)
+    #     matches = engine.evaluate("foo", {})
+    #     self.assertIsInstance(matches, types.GeneratorType, "Are you using yield?")
 
 
 # if __name__ == '__main__':
