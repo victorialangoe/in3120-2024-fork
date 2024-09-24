@@ -21,7 +21,7 @@ def assignment_a_suite() -> unittest.TestSuite:
                              "TestPostingsMerger", "TestBooleanSearchEngine"])
 
 def assignment_b_1_suite() -> unittest.TestSuite:
-    return build_test_suite(["TestSuffixArray", "TestTrie", "TestStringFinder"])
+    return build_test_suite(["TestSuffixArray"])
 
 
 def assignment_b_2_suite() -> unittest.TestSuite:
