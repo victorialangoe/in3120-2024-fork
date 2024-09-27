@@ -10,7 +10,6 @@ from .corpus import Corpus
 from .normalizer import Normalizer
 from .tokenizer import Tokenizer
 
-
 class SuffixArray:
     """
     A simple suffix array implementation. Allows us to conduct efficient substring searches.
@@ -33,26 +32,40 @@ class SuffixArray:
         Builds a simple suffix array from the set of named fields in the document collection.
         The suffix array allows us to search across all named fields in one go.
         """
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        for document in self.__corpus: 
+            doc_id = document.document_id 
+            full_content = " ".join(document[field_name] for field_name in fields) 
+            normalized_content = self.__normalize(full_content)
+            self.__haystack.append((doc_id, normalized_content))
+
+        for doc_idx, (_, content) in enumerate(self.__haystack):
+            for i in range(len(content)):
+                if i == 0 or content[i - 1] == " ": # if character is *space* before i, we know a new word is the start of i
+                    self.__suffixes.append((doc_idx, i))
+
+        self.__suffixes.sort(key=lambda x: self.__haystack[x[0]][1][x[1]:])
+
 
     def __normalize(self, buffer: str) -> str:
         """
         Produces a normalized version of the given string. Both queries and documents need to be
         identically processed for lookups to succeed.
         """
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        normalized_content = self.__normalizer.canonicalize(buffer)
+        normalized_content = self.__tokenizer.strings(normalized_content)
+        normalized_content = [self.__normalizer.normalize(t) for t in normalized_content]  # using the same as get_terms from last assignment
+        normalized_content = " ".join(normalized_content) # instead of returning list, return as str 
+        return normalized_content
 
     def __binary_search(self, needle: str) -> int:
         """
-        Does a binary search for a given normalized query (the needle) in the suffix array (the haystack).
-        Returns the position in the suffix array where the normalized query is either found, or, if not found,
-        should have been inserted.
-
-        Kind of silly to roll our own binary search instead of using the bisect module, but seems needed
-        prior to Python 3.10 due to how we represent the suffixes via (index, offset) tuples. Version 3.10
-        added support for specifying a key.
+        Does a binary search to find the first occurrence of a given normalized query
+        in the suffix array.
         """
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+
+        return bisect_left(self.__suffixes, needle, key=lambda x: self.__haystack[x[0]][1][x[1]:])
+
+
 
     def evaluate(self, query: str, options: dict) -> Iterator[Dict[str, Any]]:
         """
@@ -70,4 +83,39 @@ class SuffixArray:
         The results yielded back to the client are dictionaries having the keys "score" (int) and
         "document" (Document).
         """
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+
+        tokenized_query = self.__normalize(query)
+        print(f"Normalized query: {tokenized_query}")
+
+        if not tokenized_query:
+            return
+
+        counter = Counter()
+
+        start_idx = self.__binary_search(tokenized_query)
+        print("QUERY FOR THIS ROUND", query)
+        print("start idx for this round:", start_idx)
+
+        for i in range(start_idx, len(self.__suffixes)):
+            doc_id, pos = self.__suffixes[i]
+            tokenized_content = self.__haystack[doc_id][1]
+            suffix_tokens = tokenized_content[pos:]
+            
+            if len(tokenized_query) == 1:
+                if suffix_tokens[0].startswith(tokenized_query[0]):
+                    counter[doc_id] += 1
+                else:
+                    break 
+
+            else:
+                if suffix_tokens[:len(tokenized_query)] == tokenized_query:
+                    counter[doc_id] += 1
+                else:
+                    break 
+
+        for doc_id, score in counter.most_common(options.get("hit_count", 5)):
+            results = {
+                "document": self.__corpus.get_document(doc_id),
+                "score": score
+            }
+            yield results

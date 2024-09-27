@@ -25,24 +25,18 @@ class PostingsMerger:
         to the document identifiers.
         """
 
-        try:
-            pointer1 = next(iter1)
-            pointer2 = next(iter2)
-        except StopIteration:
-            return
+        pointer1 = next(iter1, None)
+        pointer2 = next(iter2, None) # added None to every next as feedbakc said to make it more cleaner
         
-        while True:
-            try: 
-                if pointer1.document_id == pointer2.document_id:
-                    yield pointer1
-                    pointer1 = next(iter1)
-                    pointer2 = next(iter2)
-                elif pointer1.document_id < pointer2.document_id:
-                    pointer1 = next(iter1)
-                else:
-                    pointer2 = next(iter2)
-            except StopIteration:
-                break
+        while pointer1 is not None and pointer2 is not None:
+            if pointer1.document_id == pointer2.document_id:
+                yield pointer1
+                pointer1 = next(iter1, None)
+                pointer2 = next(iter2, None)
+            elif pointer1.document_id < pointer2.document_id:
+                pointer1 = next(iter1, None)
+            else:
+                pointer2 = next(iter2, None)
 
        
 
@@ -55,51 +49,27 @@ class PostingsMerger:
         The posting lists are assumed sorted in increasing order according
         to the document identifiers.
         """
-        has_seen = set()  
+        
+        pointer1 = next(iter1, None)
+        pointer2 = next(iter2, None)
 
-        try:
-            pointer1 = next(iter1)
-        except StopIteration:
-            yield from iter2  
-            return
-        
-        try:
-            pointer2 = next(iter2)
-        except StopIteration:
-            yield pointer1 
-            yield from iter1 
-            return
-        
-        while True: 
-            try:
-                if pointer1.document_id == pointer2.document_id:
-                    if pointer1.document_id not in has_seen:
-                        yield pointer1
-                        has_seen.add(pointer1.document_id)
-                    pointer1 = next(iter1)
-                    pointer2 = next(iter2)
-                elif pointer1.document_id < pointer2.document_id:
-                    if pointer1.document_id not in has_seen:
-                        yield pointer1
-                        has_seen.add(pointer1.document_id)
-                    pointer1 = next(iter1)
-                else:
-                    if pointer2.document_id not in has_seen:
-                        yield pointer2
-                        has_seen.add(pointer2.document_id)
-                    pointer2 = next(iter2)
-            except StopIteration:
-                break
-        
-        if pointer1.document_id not in has_seen:
-            yield pointer1
-            has_seen.add(pointer1.document_id)
-        yield from (p for p in iter1 if p.document_id not in has_seen)
-        
-        if pointer2.document_id not in has_seen:
-            yield pointer2
-            has_seen.add(pointer2.document_id)
-        yield from (p for p in iter2 if p.document_id not in has_seen)
+        while pointer1 is not None or pointer2 is not None:
+            if pointer1 is None:
+                yield pointer2
+                pointer2 = next(iter2, None)
+            elif pointer2 is None:
+                yield pointer1
+                pointer1 = next(iter1, None)
+            elif pointer1.document_id < pointer2.document_id:
+                yield pointer1
+                pointer1 = next(iter1, None)
+            elif pointer1.document_id > pointer2.document_id:
+                yield pointer2
+                pointer2 = next(iter2, None)
+            else:
+                yield pointer1 
+                pointer1 = next(iter1, None)
+                pointer2 = next(iter2, None)
 
     @staticmethod
     def difference(iter1: Iterator[Posting], iter2: Iterator[Posting]) -> Iterator[Posting]:
@@ -110,18 +80,16 @@ class PostingsMerger:
         The posting lists are assumed sorted in increasing order according
         to the document identifiers.
         """        
-        try:
-            pointer1 = next(iter1)
-        except StopIteration:
-            return # only return since then iter1 has nothing in common to iter2
-        
-        try:
-            pointer2 = next(iter2)
-        except StopIteration:
-            yield pointer1  
-            yield from iter1 
+        pointer1 = next(iter1, None)
+        if pointer1 is None:
+            return  # only return since then iter1 has nothing in common to iter2
+
+        pointer2 = next(iter2, None)
+        if pointer2 is None:
+            yield pointer1
+            yield from iter1
             return
-        
+            
         last_yielded = None
 
         while True:
