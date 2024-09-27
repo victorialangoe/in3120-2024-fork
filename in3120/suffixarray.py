@@ -43,7 +43,7 @@ class SuffixArray:
                 if i == 0 or content[i - 1] == " ": # if character is *space* before i, we know a new word is the start of i
                     self.__suffixes.append((doc_idx, i))
 
-        self.__suffixes.sort(key=lambda x: self.__haystack[x[0]][1][x[1]:])
+        self.__suffixes.sort(key=lambda x: self.__haystack[x[0]][1][x[1]:]) # said we could have a naïve construft of our suffixarray 
 
 
     def __normalize(self, buffer: str) -> str:
