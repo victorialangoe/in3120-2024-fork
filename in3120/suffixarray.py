@@ -35,6 +35,7 @@ class SuffixArray:
         for document in self.__corpus: 
             doc_id = document.document_id 
             full_content = " ".join(document[field_name] for field_name in fields) 
+            print(full_content)
             normalized_content = self.__normalize(full_content)
             self.__haystack.append((doc_id, normalized_content))
 
@@ -43,7 +44,10 @@ class SuffixArray:
                 if i == 0 or content[i - 1] == " ": # if character is *space* before i, we know a new word is the start of i
                     self.__suffixes.append((doc_idx, i))
 
+        print(self.__suffixes)
+
         self.__suffixes.sort(key=lambda x: self.__haystack[x[0]][1][x[1]:]) # said we could have a naïve construft of our suffixarray 
+        print(self.__suffixes)
 
 
     def __normalize(self, buffer: str) -> str:

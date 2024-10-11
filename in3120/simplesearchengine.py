@@ -46,4 +46,49 @@ class SimpleSearchEngine:
         N is inferred from the query via the "match_threshold" (float) option, and the maximum number of documents
         to return to the client is controlled via the "hit_count" (int) option.
         """
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        terms = list(self.__inverted_index.get_terms(query))
+        term_counts = Counter(terms)
+        terms = list(term_counts)
+        m = len(terms)
+        treshold = options.get("match_threshold", 0.75) #0,75 as default
+        n =max(1, min(m, int(treshold * m)))
+        max_documents=options.get("hit_count")
+        sieve= Sieve(max_documents)
+        posting_iterators = [self.__inverted_index.get_postings_iterator(term) for term in terms]#retrieves posting lists for each term in the query
+        postings = [next(iterator, None) for iterator in posting_iterators] #postings stores the first posting from each terms posting list
+
+        def has_remaining_postings(postings_list): # to check if we have more postings to process, if not then break the loop
+            return any(posting is not None for posting in postings_list)
+
+        while has_remaining_postings(postings):
+            matching_indices = set()
+            min_doc_id = min(posting.document_id for posting in postings if posting is not None)
+
+            for idx, posting in enumerate(postings):
+                if posting is not None and posting.document_id == min_doc_id:
+                    matching_indices.add(idx)
+
+            if len(matching_indices) >= n:
+                doc_id = min_doc_id
+                ranker.reset(doc_id)
+                for idx in matching_indices:
+                    term = terms[idx]
+                    multiplicity = term_counts[term]
+                    posting = postings[idx]
+                    ranker.update(term, multiplicity, posting)
+                score = ranker.evaluate()
+                sieve.sift(score, doc_id)
+
+            for idx in matching_indices:
+                try:
+                    postings[idx] = next(posting_iterators[idx])
+                except StopIteration:
+                    postings[idx] = None
+
+        for score, doc_id in sieve.winners():
+            yield {"score": score, "document": self.__corpus.get_document(doc_id)}
+
+
+
+   
+       
