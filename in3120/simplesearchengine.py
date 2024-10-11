@@ -50,14 +50,14 @@ class SimpleSearchEngine:
         term_counts = Counter(terms)
         terms = list(term_counts)
         m = len(terms)
-        treshold = options.get("match_threshold", 0.75) #0,75 as default
+        treshold = options.get("match_threshold", 0.75) # 0,75 as default
         n =max(1, min(m, int(treshold * m)))
         max_documents=options.get("hit_count")
         sieve= Sieve(max_documents)
         posting_iterators = [self.__inverted_index.get_postings_iterator(term) for term in terms]#retrieves posting lists for each term in the query
         postings = [next(iterator, None) for iterator in posting_iterators] #postings stores the first posting from each terms posting list
 
-        def has_remaining_postings(postings_list): # to check if we have more postings to process, if not then break the loop
+        def has_remaining_postings(postings_list): # helper func to check if we have more postings to process, if not then break the loop
             return any(posting is not None for posting in postings_list)
 
         while has_remaining_postings(postings):
