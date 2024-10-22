@@ -46,15 +46,13 @@ class BetterRanker(Ranker):
         idf = math.log(n / doc_freq)
         tf_idf = term_freq * idf
 
-        static_score_total = 0.0
-        for document in self._corpus:
-            static_score = document.get_field("static_quality_score", 0.0)  
-            static_score_total = static_score_total + static_score
+        document = self._corpus.get_document(self._document_id)
+        static_score = document.get_field("static_quality_score", 0.0)
 
         dynamic_score = tf_idf * self._dynamic_score_weight
-        static_score = static_score_total * self._static_score_weight
+        weighted_static_score = static_score * self._static_score_weight
 
-        self._score += dynamic_score + static_score
+        self._score += dynamic_score + weighted_static_score
     
     def evaluate(self) -> float:
         return self._score
