@@ -34,7 +34,19 @@ class ShingleGenerator(Tokenizer):
         self.__width = width
 
     def spans(self, buffer: str) -> Iterator[Tuple[int, int]]:
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        if buffer == "":
+            return []
+        
+        buffer_length = len(buffer)
+        if buffer_length <= self.__width:
+            yield (0, len(buffer))
+            return
+      
+        for start_idx in range(buffer_length- self.__width + 1):
+            yield (start_idx, start_idx + self.__width)
+
+
+
 
 class WordShingleGenerator(Tokenizer):
     """
