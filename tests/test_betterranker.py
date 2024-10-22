@@ -32,18 +32,18 @@ class TestBetterRanker(unittest.TestCase):
         self.__ranker.update("foo", 1, in3120.Posting(2, 2))
         score2 = self.__ranker.evaluate()
         self.assertGreater(score1, 0.0)
-    #     self.assertGreater(score2, 0.0)
-    #     self.assertGreater(score2, score1)
+        self.assertGreater(score2, 0.0)
+        self.assertGreater(score2, score1)
 
-    # def test_document_id_mismatch(self):
-    #     self.__ranker.reset(21)
-    #     with self.assertRaises(AssertionError):
-    #         self.__ranker.update("foo", 1, in3120.Posting(42, 4))
+    def test_document_id_mismatch(self):
+        self.__ranker.reset(21)
+        with self.assertRaises(AssertionError):
+            self.__ranker.update("foo", 1, in3120.Posting(42, 4))
 
-    # def test_inverse_document_frequency(self):
-    #     self.__ranker.reset(3)
-    #     self.__ranker.update("the", 1, in3120.Posting(3, 1))
-    #     self.assertAlmostEqual(self.__ranker.evaluate(), 0.0, 8)
+    def test_inverse_document_frequency(self):
+        self.__ranker.reset(3)
+        self.__ranker.update("the", 1, in3120.Posting(3, 1))
+        self.assertAlmostEqual(self.__ranker.evaluate(), 0.0, 8)
     #     self.__ranker.reset(3)
     #     self.__ranker.update("bar", 1, in3120.Posting(3, 1))
     #     score1 = self.__ranker.evaluate()

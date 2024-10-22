@@ -33,10 +33,28 @@ class BetterRanker(Ranker):
         self._inverted_index = inverted_index
 
     def reset(self, document_id: int) -> None:
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        self._score = 0.0
+        self._document_id = document_id
 
     def update(self, term: str, multiplicity: int, posting: Posting) -> None:
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        if posting.document_id != self._document_id:
+            raise AssertionError("The documents are not the same")
+        
+        term_freq = posting.term_frequency * multiplicity
+        n = len(self._corpus) # n is the total number of documents in the corpus
+        doc_freq = self._inverted_index.get_document_frequency(term)
+        idf = math.log(n / doc_freq)
+        tf_idf = term_freq * idf
 
+        static_score_total = 0.0
+        for document in self._corpus:
+            static_score = document.get_field("static_quality_score", 0.0)  
+            static_score_total = static_score_total + static_score
+
+        dynamic_score = tf_idf * self._dynamic_score_weight
+        static_score = static_score_total * self._static_score_weight
+
+        self._score += dynamic_score + static_score
+    
     def evaluate(self) -> float:
-        raise NotImplementedError("You need to implement this as part of the obligatory assignment.")
+        return self._score
