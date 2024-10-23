@@ -21,7 +21,7 @@ def assignment_a_suite() -> unittest.TestSuite:
                              "TestPostingsMerger", "TestBooleanSearchEngine"])
 
 def assignment_b_1_suite() -> unittest.TestSuite:
-    return build_test_suite(["TestStringFinder","TestTrie","TestSuffixArray"])
+    return build_test_suite(["TestSuffixArray", "TestTrie", "TestStringFinder"])
 
 
 def assignment_b_2_suite() -> unittest.TestSuite:
@@ -37,7 +37,7 @@ def assignment_c_2_suite() -> unittest.TestSuite:
 
 
 def assignment_d_1_suite() -> unittest.TestSuite:
-    return build_test_suite([ "TestBetterRanker",]) # , "TestSparseDocumentVector" "TestShingleGenerator","TestWordShingleGenerator"
+    return build_test_suite(["TestBetterRanker", "TestShingleGenerator", "TestWordShingleGenerator", "TestSparseDocumentVector"])
 
 
 def assignment_e_1_suite() -> unittest.TestSuite:
